@@ -39,18 +39,17 @@ def merge_datasets() -> list:
         }
         
         # HuggingFace gives us fault name
-        if code in hf_data:
-            record["fault_name"] = hf_data[code]
-        
-        # Scraped data enriches with symptoms, causes, repair steps
+        # Scraped data takes priority — richer and more accurate
         if code in scraped:
             scrape = scraped[code]
-            # Prefer scraped fault name if available and HF one is missing
-            if not record["fault_name"] and scrape["fault_name"]:
-                record["fault_name"] = scrape["fault_name"]
+            record["fault_name"] = scrape["fault_name"]
             record["symptoms"] = scrape["symptoms"]
             record["causes"] = scrape["causes"]
             record["repair_steps"] = scrape["repair_steps"]
+
+        # HuggingFace fills in fault name only if scraped doesn't have it
+        if code in hf_data and not record["fault_name"]:
+            record["fault_name"] = hf_data[code]
         
         # Create rich text for embedding
         record["text"] = f"""DTC Code: {record['dtc_code']}
