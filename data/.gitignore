@@ -1,0 +1,17 @@
+# Virtual environment
+venv/
+
+# Data files
+data/scraped_obd.json
+data/merged_obd.json
+
+# Environment variables
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Qdrant local storage
+qdrant_storage/

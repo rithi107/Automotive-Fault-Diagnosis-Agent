@@ -1,0 +1,13 @@
+langchain
+langgraph
+langchain-groq
+qdrant-client
+sentence-transformers
+rank-bm25
+streamlit
+python-dotenv
+pandas
+tqdm
+dataset
+beautifulsoup4
+requests
