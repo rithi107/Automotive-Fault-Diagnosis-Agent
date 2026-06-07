@@ -28,6 +28,10 @@ This system automates real diagnosis — not just code lookup — using a multi-
 ### Diagnosis Output
 ![Diagnosis Output](docs/demo_output.png)
 
+### Multi-Fault Diagnosis (P0300 + P0171 + P0174)
+![Multi-fault Input](docs/demo_multifault_input.png)
+![Multi-fault Output](docs/demo_multifault_output.png)
+
 ---
 
 ## 🏗️ Architecture
