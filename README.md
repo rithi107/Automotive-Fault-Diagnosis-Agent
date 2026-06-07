@@ -1,15 +1,14 @@
 # 🔧 Automotive Fault Diagnosis Agent
 
-A multi-agent LangGraph system that diagnoses automotive faults from DTC codes 
-and freeze frame sensor data using hybrid RAG retrieval over OBD-II knowledge bases.
+A multi-agent LangGraph system that diagnoses automotive faults from DTC codes and freeze frame sensor data using hybrid RAG retrieval over OBD-II knowledge bases.
+
+🚀 **[Live Demo](https://automotive-fault-diagnosis-agent-exhe8bkmwfbybjfhmstlzv.streamlit.app/)**
 
 ---
 
 ## 🚗 Problem Statement
 
-When a vehicle throws a fault code, mechanics and engineers spend significant time 
-manually cross-referencing DTC codes across repair manuals, technical service 
-bulletins, and past repair histories.
+When a vehicle throws a fault code, mechanics and engineers spend significant time manually cross-referencing DTC codes across repair manuals, technical service bulletins, and past repair histories.
 
 Simply asking an LLM "what is P0301?" gives a generic answer. But real diagnosis requires reasoning over:
 - **Freeze frame sensor data** (RPM, coolant temp, fuel trim, MAP at fault time)
@@ -17,9 +16,17 @@ Simply asking an LLM "what is P0301?" gives a generic answer. But real diagnosis
 - **Manufacturer and model-specific repair knowledge**
 - **Structured actionable output** a mechanic can actually use
 
-This system automates real diagnosis — not just code lookup — using a multi-agent 
-AI pipeline that retrieves specific fault knowledge and reasons through probable 
-root causes, severity, and recommended repair actions.
+This system automates real diagnosis — not just code lookup — using a multi-agent AI pipeline that retrieves specific fault knowledge and reasons through probable root causes, severity, and recommended repair actions.
+
+---
+
+## 📸 Demo
+
+### Input
+![Input Form](docs/demo_input.png)
+
+### Diagnosis Output
+![Diagnosis Output](docs/demo_output.png)
 
 ---
 
@@ -40,10 +47,10 @@ root causes, severity, and recommended repair actions.
 | Component | Technology |
 |-----------|------------|
 | Agent Orchestration | LangGraph |
-| Vector Database | Qdrant |
-| Hybrid Retrieval | Dense Embeddings + BM25 |
-| Embeddings | sentence-transformers |
-| LLM | Llama 3.3 via Groq |
+| Vector Database | Qdrant Cloud |
+| Hybrid Retrieval | Dense Embeddings + BM25 with RRF |
+| Embeddings | sentence-transformers (all-MiniLM-L6-v2) |
+| LLM | Llama 3.3-70b via Groq |
 | UI | Streamlit |
 | Language | Python 3.11+ |
 
@@ -52,9 +59,9 @@ root causes, severity, and recommended repair actions.
 ## 🔄 How It Works
 
 1. User inputs one or more DTC codes (e.g. `P0301`, `P0171`) and optional freeze frame sensor data via Streamlit UI
-2. **Retrieval Agent** performs hybrid search — dense semantic search + BM25 keyword search — over the OBD-II knowledge base stored in Qdrant
-3. **Diagnosis Agent** receives retrieved context and reasons through probable root causes using LangGraph, accounting for multi-fault correlations and sensor data
-4. **Response Agent** formats structured output — root cause, severity rating, recommended repair steps, parts likely needed
+2. **Retrieval Agent** performs hybrid search — dense semantic search + BM25 keyword search — over 5564 OBD-II records stored in Qdrant Cloud
+3. **Diagnosis Agent** receives retrieved context and reasons through probable root causes using LangGraph, accounting for multi-fault correlations and freeze frame sensor data
+4. **Response Agent** formats structured output — root cause, severity rating, recommended repair steps, immediate action
 5. Results displayed in a clean Streamlit interface
 
 ---
@@ -76,13 +83,15 @@ root causes, severity, and recommended repair actions.
 | Path | Description |
 |------|-------------|
 | `agents/retrieval_agent.py` | Hybrid search over Qdrant |
-| `agents/diagnosis_agent.py` | Root cause reasoning |
-| `agents/response_agent.py` | Structured output formatting |
+| `agents/diagnosis_agent.py` | Freeze frame aware root cause reasoning |
+| `agents/response_agent.py` | Structured JSON output formatting |
 | `pipeline/graph.py` | LangGraph orchestration |
 | `retrieval/embedder.py` | sentence-transformers embeddings |
 | `retrieval/bm25_retriever.py` | BM25 keyword retrieval |
-| `retrieval/hybrid_retriever.py` | Combined hybrid retrieval |
-| `data/ingest.py` | OBD-II knowledge base ingestion |
+| `retrieval/hybrid_retriever.py` | Combined hybrid retrieval with RRF |
+| `data/scraper.py` | OBDGuide.com scraper |
+| `data/merge.py` | Multi-source knowledge base merger |
+| `data/ingest.py` | Qdrant Cloud ingestion pipeline |
 | `ui/app.py` | Streamlit UI |
 
 ---
@@ -91,7 +100,7 @@ root causes, severity, and recommended repair actions.
 
 ### Prerequisites
 - Python 3.11+
-- Qdrant running locally or via Qdrant Cloud free tier
+- Qdrant Cloud free tier account
 - Groq API key (free at console.groq.com)
 
 ### Installation
@@ -100,18 +109,20 @@ root causes, severity, and recommended repair actions.
 git clone https://github.com/rithi107/Automotive-Fault-Diagnosis-Agent.git
 cd Automotive-Fault-Diagnosis-Agent
 python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+venv\Scripts\activate        # Windows
 pip install -r requirements.txt
-cp .env.example .env            # Add your API keys
+cp .env.example .env         # Add your API keys
 ```
 
-### Run Qdrant Locally
+### Environment Variables
 
-```bash
-docker run -p 6333:6333 qdrant/qdrant
+```env
+QDRANT_URL=your_qdrant_cluster_url
+QDRANT_API_KEY=your_qdrant_api_key
+GROQ_API_KEY=your_groq_api_key
 ```
 
-### Run the App
+### Run
 
 ```bash
 streamlit run ui/app.py
@@ -119,21 +130,28 @@ streamlit run ui/app.py
 
 ---
 
-## 📸 Demo
+## 📊 Knowledge Base
 
-> Coming soon — UI screenshot and walkthrough GIF
+| Source | Records | Content |
+|--------|---------|---------|
+| OBDGuide.com (scraped) | 2898 | Symptoms, causes, repair steps |
+| Epitech/obd-codes-fine-tune (HuggingFace) | 3071 | DTC codes and fault names |
+| **Merged Total** | **5564** | **Rich diagnostic content** |
 
 ---
 
 ## 🗺️ Roadmap
 
 - [x] Project setup and architecture
-- [ ] OBD-II knowledge base ingestion pipeline
-- [ ] Qdrant hybrid retrieval setup
-- [ ] LangGraph multi-agent pipeline
-- [ ] Streamlit UI
-- [ ] Demo GIF and screenshots
+- [x] OBD-II knowledge base ingestion pipeline
+- [x] Qdrant Cloud hybrid retrieval setup
+- [x] LangGraph multi-agent pipeline
+- [x] Freeze frame aware diagnosis
+- [x] Streamlit UI
+- [x] Live deployment on Streamlit Cloud
+- [ ] Multi-fault correlation improvements
 - [ ] Docker support
+- [ ] Vehicle make/model specific diagnosis
 
 ---
 
@@ -141,3 +159,4 @@ streamlit run ui/app.py
 
 Rithika
 Automotive BSW + GenAI Engineer
+[LinkedIn] (www.linkedin.com/in/rithikag710) | [GitHub](https://github.com/rithi107)
