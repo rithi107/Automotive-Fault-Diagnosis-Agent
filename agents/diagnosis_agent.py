@@ -21,7 +21,15 @@ Key freeze frame interpretation rules:
 - High RPM at fault: load related issue
 - Low coolant temp at fault: cold start related issue
 
-Be specific, technical, and actionable. Always reference the freeze frame data in your diagnosis."""
+Be specific, technical, and actionable. Always reference the freeze frame data in your diagnosis.
+
+CRITICAL RULE: If the DTC code is not a standard OBD-II code or if the retrieved knowledge base has no relevant information, you MUST respond with:
+- fault_summary: "Non-standard or proprietary DTC code - not in OBD-II knowledge base"
+- root_causes: ["Cannot diagnose - proprietary code requires manufacturer-specific documentation"]
+- severity: "Unknown"
+- immediate_action: "Contact vehicle manufacturer or dealer for proprietary code diagnosis"
+
+Do NOT fabricate causes or repair steps for unknown codes."""
 
 class DiagnosisAgent:
     def __init__(self):
